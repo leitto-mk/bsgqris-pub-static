@@ -106,7 +106,7 @@ export default {
 
 <template>
     <FloatingConfigurator />
-    <Fluid>
+    <Fluid class="layout-menu bg-slate-100 dark:bg-zinc-900 h-screen">
         <div id="home" class="landing-wrapper overflow-hidden">
             <div class="py-2 px-2 mx-0 md:mx-12 lg:mx-20 lg:px-20 flex items-center justify-between relative lg:static">
                 <a class="flex items-center" href="/dashboard">

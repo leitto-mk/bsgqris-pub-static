@@ -7,10 +7,6 @@ import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    base: 'https://gitub.com/leitto-mk/bsgqris-pub-static.git',
-    build: {
-        outDir: 'build' // specify the directory here
-    },
     optimizeDeps: {
         noDiscovery: true
     },
