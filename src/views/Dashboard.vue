@@ -106,9 +106,6 @@ export default {
 
 <template>
     <Fluid class="layout-menu bg-slate-100 dark:bg-zinc-900 min-h-screen md:min-h-0 md:h-auto lg:h-screen">
-        <div class="flex flex-row-reverse">
-            <Button label="logout" severity="secondary"></Button>
-        </div>
         <div id="home" class="landing-wrapper overflow-hidden">
             <div class="py-2 px-2 mx-0 md:mx-12 lg:mx-20 lg:px-20 flex items-center justify-between relative lg:static">
                 <a class="flex items-center" href="/">
@@ -260,7 +257,7 @@ export default {
             </div>
 
             <div v-if="qris_state" class="flex flex-row justify-center mx-8 lg:mx-20 gap-3 lg:gap-14 mt-5 lg:mt-14 mb-10">
-                <img src="@/assets/qris.jpeg" alt="" class="lg:w-[50%]" />
+                <!-- <img src="@/assets/qris.jpeg" alt="" class="lg:w-[50%]" /> -->
             </div>
         </div>
     </Fluid>
