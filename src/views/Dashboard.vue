@@ -1,12 +1,14 @@
 <script>
 import { useLayout } from '@/layout/composables/layout';
 import moment from 'moment';
+import { useToast } from 'primevue/usetoast';
 
 export default {
     setup() {
         const { isDarkTheme } = useLayout();
 
         return {
+            toast: useToast(),
             isDarkTheme: isDarkTheme
         };
     },
@@ -14,59 +16,20 @@ export default {
         return {
             shown: false,
             skeleton: false,
-            qris_state: false,
             transactions_state: false,
             terminal_state: false,
 
             amount: 0,
+            transaction_date: null,
             transactions: []
         };
     },
     mounted() {
-        this.transactions = [
-            {
-                issuer: '9360091538325669206',
-                customer: 'QRISAJ',
-                rrn: '012442983091',
-                total: 10000000,
-                timestamp: moment().format('YYYY-MM-DD HH:mm:ss')
-            },
-            {
-                issuer: '9360091538325669207',
-                customer: 'QRISAJ',
-                rrn: '012442983092',
-                total: 10000000,
-                timestamp: moment().format('YYYY-MM-DD HH:mm:ss')
-            },
-            {
-                issuer: '9360091538325669208',
-                customer: 'QRISAJ',
-                rrn: '012442983093',
-                total: 10000000,
-                timestamp: moment().format('YYYY-MM-DD HH:mm:ss')
-            },
-            {
-                issuer: '9360091538325669209',
-                customer: 'QRISAJ',
-                rrn: '012442983094',
-                total: 10000000,
-                timestamp: moment().format('YYYY-MM-DD HH:mm:ss')
-            },
-            {
-                issuer: '9360091538325669210',
-                customer: 'QRISAJ',
-                rrn: '012442983095',
-                total: 10000000,
-                timestamp: moment().format('YYYY-MM-DD HH:mm:ss')
-            },
-            {
-                issuer: '9360091538325669211',
-                customer: 'QRISAJ',
-                rrn: '012442983096',
-                total: 10000000,
-                timestamp: moment().format('YYYY-MM-DD HH:mm:ss')
-            }
-        ];
+        this.toast.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Testing'
+        });
     },
     methods: {
         emptyState() {
@@ -99,29 +62,93 @@ export default {
                 this.skeleton = false;
                 this.shown = false;
             }, 10000);
+        },
+
+        getTransations() {
+            console.log('getting transactions...');
+            this.transactions = [
+                {
+                    issuer: '9360091538325669206',
+                    customer: 'QRISAJ',
+                    rrn: '012442983091',
+                    total: 10000000,
+                    timestamp: moment(this.transaction_date).format('YYYY-MM-DD HH:mm:ss')
+                },
+                {
+                    issuer: '9360091538325669207',
+                    customer: 'QRISAJ',
+                    rrn: '012442983092',
+                    total: 10000000,
+                    timestamp: moment(this.transaction_date).format('YYYY-MM-DD HH:mm:ss')
+                },
+                {
+                    issuer: '9360091538325669208',
+                    customer: 'QRISAJ',
+                    rrn: '012442983093',
+                    total: 10000000,
+                    timestamp: moment(this.transaction_date).format('YYYY-MM-DD HH:mm:ss')
+                },
+                {
+                    issuer: '9360091538325669209',
+                    customer: 'QRISAJ',
+                    rrn: '012442983094',
+                    total: 10000000,
+                    timestamp: moment(this.transaction_date).format('YYYY-MM-DD HH:mm:ss')
+                },
+                {
+                    issuer: '9360091538325669210',
+                    customer: 'QRISAJ',
+                    rrn: '012442983095',
+                    total: 10000000,
+                    timestamp: moment(this.transaction_date).format('YYYY-MM-DD HH:mm:ss')
+                },
+                {
+                    issuer: '9360091538325669211',
+                    customer: 'QRISAJ',
+                    rrn: '012442983096',
+                    total: 10000000,
+                    timestamp: moment(this.transaction_date).format('YYYY-MM-DD HH:mm:ss')
+                }
+            ];
         }
     }
 };
 </script>
 
 <template>
-    <Fluid class="layout-menu bg-slate-100 dark:bg-zinc-900 min-h-screen md:min-h-0 md:h-auto lg:h-screen">
+    <Fluid class="layout-menu dark:bg-zinc-900 min-h-screen md:min-h-0 md:h-auto lg:h-screen">
+        <div
+            class="h-full w-full fixed"
+            style="
+                background: rgb(0, 0, 0);
+                background: linear-gradient(
+                    149deg,
+                    rgba(0, 0, 0, 0.9473039215686274) 0%,
+                    rgba(84, 15, 5, 0.8660714285714286) 39%,
+                    rgba(137, 32, 18, 0.8576680672268908) 55%,
+                    rgba(166, 41, 25, 0.8548669467787114) 70%,
+                    rgba(201, 34, 13, 0.7204131652661064) 89%,
+                    rgba(196, 13, 13, 0.6615896358543417) 100%
+                );
+                /* clip-path: ellipse(150% 87% at 93% 13%); */
+                z-index: -1;
+            "
+        ></div>
         <div id="home" class="landing-wrapper overflow-hidden">
-            <div class="py-2 px-2 mx-0 md:mx-12 lg:mx-20 lg:px-20 flex items-center justify-between relative lg:static">
-                <a class="flex items-center" href="/">
-                    <div class="flex items-center justify-center mr-3">
-                        <img v-if="isDarkTheme" src="@/assets/dashboard-light.png" alt="" class="w-[75%] lg:w-[45%]" />
-                        <img v-else src="@/assets/dashboard-dark.png" alt="" class="w-[75%] lg:w-[45%]" />
-                    </div>
-                    <!-- <span class="text-surface-600 dark:text-surface-0 font-bold text-2xl leading-normal mr-20">BSGQris</span> -->
+            <Toast />
+            <div class="py-2 px-2 mx-12 lg:mx-20 lg:px-20 flex items-center relative lg:static">
+                <a class="flex flex-row justify-center ml-20" href="/">
+                    <!-- <img v-if="isDarkTheme" src="@/assets/dashboard-light.png" alt="" class="w-[75%] lg:w-[45%]" />
+                    <img v-else src="@/assets/dashboard-dark.png" alt="" class="w-[75%] lg:w-[45%]" /> -->
+                    <img src="@/assets/dashboard-light.png" alt="" class="w-[75%] lg:w-[45%]" />
                 </a>
-                <!-- <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
-                    <Button label="Login" rounded class="w-24"></Button>
-                </div> -->
+                <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
+                    <Button label="Logout" severity="contrast" rounded class="w-24"></Button>
+                </div>
             </div>
 
             <div class="flex flex-col justify-between mx-20 gap-2">
-                <h1 class="lg:text-4xl font-bold text-gray-900 dark:text-slate-300 leading-tight"><span class="font-light block">Selamat Datang</span>MERCHANT_NAME</h1>
+                <h1 class="lg:text-4xl font-bold text-slate-100 leading-tight"><span class="font-light block text-3xl">Selamat Datang,</span>MERCHANT_NAME</h1>
                 <span class="text-base rounded text-slate-100 text-center uppercase p-1 bg-green-500 w-20">ADMIN</span>
             </div>
 
@@ -142,8 +169,7 @@ export default {
                 <Button
                     label="User"
                     icon="pi pi-desktop"
-                    severity="info"
-                    :outlined="terminal_state ? false : true"
+                    :severity="terminal_state ? 'success' : 'secondary'"
                     rounded
                     :class="terminal_state ? 'w-40 h-14 animate-scalein' : 'w-30 h-14'"
                     @click="
@@ -152,22 +178,9 @@ export default {
                     "
                 />
                 <Button
-                    label="QRIS"
-                    icon="pi pi-qrcode"
-                    severity="danger"
-                    :outlined="qris_state ? false : true"
-                    rounded
-                    :class="qris_state ? 'w-40 h-14 animate-scalein' : 'w-30 h-14'"
-                    @click="
-                        emptyState();
-                        qris_state = !qris_state;
-                    "
-                />
-                <Button
-                    label="Transaksi"
+                    label="Transaksi Outlet"
                     icon="pi pi-credit-card"
-                    severity="success"
-                    :outlined="transactions_state ? false : true"
+                    :severity="transactions_state ? 'success' : 'secondary'"
                     rounded
                     :class="transactions_state ? 'w-40 h-14 animate-scalein' : 'w-30 h-14'"
                     @click="
@@ -179,12 +192,12 @@ export default {
 
             <div v-if="terminal_state" class="flex flex-row justify-center mx-8 lg:mx-20 gap-3 lg:gap-14 mt-10 mb-10">
                 <div class="flex flex-wrap w-40">
-                    <Button label="Tambah" icon="pi pi-user-plus" severity="contrast" outlined rounded class="hover:animate-scalein" />
+                    <Button label="Tambah User" icon="pi pi-user-plus" severity="secondary" rounded class="hover:animate-scalein" />
                 </div>
             </div>
 
-            <div v-if="terminal_state" class="grid lg:grid-cols-3 justify-center gap-2 lg:gap-16 lg:mx-80 mt-5">
-                <div class="border border-slate-200 rounded-lg p-5 group hover:transition hover:ease-in-out hover:delay-150 hover:border hover:rounded-xl hover:p-10 hover:border-orange-300 mb-3 lg:mb-20">
+            <div v-if="terminal_state" class="flex flex-col lg:flex-row lg:row-span-3 justify-center gap-1 lg:gap-16 max-md:mx-12 mt-5">
+                <div class="border border-slate-100 rounded-lg p-5 w-5/5 lg:w-[28rem] group hover:transition hover:ease-in-out hover:delay-150 hover:border hover:rounded-xl hover:p-10 hover:border-orange-300 mb-3 lg:mb-20">
                     <div class="flex flex-row justify-between gap-3">
                         <div class="flex flex-col gap-2">
                             <Tag value="A01" severity="info" class="w-16 h-15"></Tag>
@@ -194,12 +207,12 @@ export default {
                             <div class="flex flex-row-reverse mb-6">
                                 <Tag value="USER" severity="warn" class="w-16 h-15 group-hover:text-lg"></Tag>
                             </div>
-                            <span class="text-xs font-normal text-slate-700 dark:text-slate-300 uppercase text-right">Device:</span>
-                            <span class="group-hover:text-sm text-xl group-hover:font-extrabold hover:text-xs font-medium text-slate-700 dark:text-slate-300 uppercase text-right">Galaxy S24 Ultra</span>
+                            <span class="text-xs font-normal text-slate-100 uppercase text-right">Status:&nbsp;&nbsp;</span>
+                            <Tag value="AKTIF" severity="success" class="w-16 h-15 mt-1 text-base group-hover:text-lg"></Tag>
                         </div>
                     </div>
                 </div>
-                <div class="border border-slate-200 rounded-lg p-5 group hover:transition hover:ease-in-out hover:delay-150 hover:border hover:rounded-xl hover:p-10 hover:border-orange-300 mb-3 lg:mb-20">
+                <div class="border border-slate-100 rounded-lg p-5 w-5/5 lg:w-[28rem] group hover:transition hover:ease-in-out hover:delay-150 hover:border hover:rounded-xl hover:p-10 hover:border-orange-300 mb-3 lg:mb-20">
                     <div class="flex flex-row justify-between gap-3">
                         <div class="flex flex-col gap-2">
                             <Tag value="A02" severity="info" class="w-16 h-15"></Tag>
@@ -209,12 +222,12 @@ export default {
                             <div class="flex flex-row-reverse mb-6">
                                 <Tag value="USER" severity="warn" class="w-16 h-15 group-hover:text-lg"></Tag>
                             </div>
-                            <span class="text-xs font-normal text-slate-700 dark:text-slate-300 uppercase text-right">Device:</span>
-                            <span class="group-hover:text-sm text-xl group-hover:font-extrabold hover:text-xs font-medium text-slate-700 dark:text-slate-300 uppercase text-right">Galaxy S24 Ultra</span>
+                            <span class="text-xs font-normal text-slate-100 uppercase text-right">Status:&nbsp;&nbsp;</span>
+                            <Tag value="AKTIF" severity="success" class="w-16 h-15 mt-1 text-base group-hover:text-lg"></Tag>
                         </div>
                     </div>
                 </div>
-                <div class="border border-slate-200 rounded-lg p-5 group hover:transition hover:ease-in-out hover:delay-150 hover:border hover:rounded-xl hover:p-10 hover:border-orange-300 mb-3 lg:mb-20">
+                <div class="border border-slate-100 rounded-lg p-5 w-5/5 lg:w-[28rem] group hover:transition hover:ease-in-out hover:delay-150 hover:border hover:rounded-xl hover:p-10 hover:border-orange-300 mb-3 lg:mb-20">
                     <div class="flex flex-row justify-between gap-3">
                         <div class="flex flex-col gap-2">
                             <Tag value="A03" severity="info" class="w-16 h-15"></Tag>
@@ -224,40 +237,47 @@ export default {
                             <div class="flex flex-row-reverse mb-6">
                                 <Tag value="USER" severity="warn" class="w-16 h-15 group-hover:text-lg"></Tag>
                             </div>
-                            <span class="text-xs font-normal text-slate-700 dark:text-slate-300 uppercase text-right">Device:</span>
-                            <span class="group-hover:text-sm text-xl group-hover:font-extrabold hover:text-xs font-medium text-slate-700 dark:text-slate-300 uppercase text-right">Galaxy S24 Ultra</span>
+                            <span class="text-xs font-normal text-slate-100 uppercase text-right">Status:&nbsp;&nbsp;</span>
+                            <Tag value="AKTIF" severity="success" class="w-16 h-15 mt-1 text-base group-hover:text-lg"></Tag>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div v-if="transactions_state" class="flex flex-col justify-center mx-12 lg:mx-80 mt-10 lg:mt-20 lg:mb-28">
-                <div v-for="trx in transactions" :key="trx.id" class="flex flex-col hover:transition hover:ease-in-out hover:delay-150 hover:border hover:rounded-2xl hover:p-3 lg:hover:p-10 hover:border-orange-300 mb-6 lg:mb-20">
+            <div v-if="transactions_state" class="flex flex-row justify-center mx-5 lg:mx-1 mt-10 mb-10">
+                <span class="text-slate-100 max-md:hidden lg:text-lg lg:font-semibold lg:mt-2 lg:mr-5">Pilih Tanggal:</span>
+                <div class="w-96">
+                    <DatePicker v-model="transaction_date" dateFormat="dd MM yy" :showButtonBar="true" showIcon fluid :showOnFocus="true" placeholder="Pilih Tanggal" @keydown.enter="getTransations()" />
+                </div>
+            </div>
+
+            <div v-if="transactions_state && transaction_date" class="flex flex-col justify-center mx-12 lg:mx-80 mt-10 lg:mt-20 lg:mb-28">
+                <div
+                    v-for="trx in transactions"
+                    :key="trx.id"
+                    class="flex flex-col hover:transition hover:ease-in-out hover:delay-150 hover:border hover:rounded-2xl hover:p-3 lg:border lg:p-5 lg:rounded-2xl lg:hover:p-10 lg:border-orange-500 hover:border-orange-500 mb-6 lg:mb-12"
+                >
                     <div class="flex flex-row justify-between gap-1">
                         <div class="flex flex-row">
                             <div class="mr-6">
                                 <Avatar icon="pi pi-check" class="w-10 h-10" shape="circle" style="background-color: rgb(74 222 128); color: white" />
                             </div>
                             <div class="flex flex-col gap-2">
-                                <span class="text-xs lg:text-xl font-medium text-slate-700 dark:text-slate-300 uppercase">Issuer</span>
-                                <span class="text-xs lg:text-xl font-medium text-slate-700 dark:text-slate-300 uppercase">Customer</span>
-                                <span class="text-xs lg:text-xl font-medium text-slate-700 dark:text-slate-300 uppercase">RRN</span>
-                                <span class="text-xs lg:text-xl font-medium text-slate-700 dark:text-slate-300 uppercase">Total</span>
+                                <span class="text-xs lg:text-xl font-medium text-slate-100 uppercase">Issuer</span>
+                                <span class="text-xs lg:text-xl font-medium text-slate-100 uppercase">Customer</span>
+                                <span class="text-xs lg:text-xl font-medium text-slate-100 uppercase">RRN</span>
+                                <span class="text-xs lg:text-xl font-medium text-slate-100 uppercase">Total</span>
                             </div>
                         </div>
                         <div class="flex flex-col gap-2">
-                            <span class="text-xs lg:text-xl font-medium text-slate-700 dark:text-slate-300 uppercase text-right">{{ trx.issuer }}</span>
-                            <span class="text-xs lg:text-xl font-medium text-slate-700 dark:text-slate-300 uppercase text-right">{{ trx.customer }}</span>
-                            <span class="text-xs lg:text-xl font-medium text-slate-700 dark:text-slate-300 uppercase text-right">{{ trx.rrn }}</span>
-                            <span class="text-xs lg:text-xl font-medium text-green-700 dark:text-green-300 uppercase text-right">{{ getAmountFormatting(trx.total) }}</span>
-                            <span class="flex flex-col text-xs lg:text-xl mt-1 font-medium text-orange-400 dark:text-orange-300 uppercase">{{ trx.timestamp }} WITA</span>
+                            <span class="text-xs lg:text-xl font-medium text-slate-100 uppercase text-right">{{ trx.issuer }}</span>
+                            <span class="text-xs lg:text-xl font-medium text-slate-100 uppercase text-right">{{ trx.customer }}</span>
+                            <span class="text-xs lg:text-xl font-medium text-slate-100 uppercase text-right">{{ trx.rrn }}</span>
+                            <span class="text-xs lg:text-xl font-medium text-green-100 uppercase text-right">{{ getAmountFormatting(trx.total) }}</span>
+                            <span class="flex flex-col text-xs lg:text-xl mt-1 font-medium text-orange-100 uppercase">{{ trx.timestamp }} WITA</span>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div v-if="qris_state" class="flex flex-row justify-center mx-8 lg:mx-20 gap-3 lg:gap-14 mt-5 lg:mt-14 mb-10">
-                <!-- <img src="@/assets/qris.jpeg" alt="" class="lg:w-[50%]" /> -->
             </div>
         </div>
     </Fluid>
