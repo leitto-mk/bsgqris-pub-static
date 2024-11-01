@@ -75,6 +75,10 @@ export default {
             }
         };
     },
+    beforeMount() {
+        const currentDarkTheme = JSON.parse(localStorage.getItem('qris-merchant-dark'));
+        currentDarkTheme ? document.documentElement.classList.add('app-dark') : document.documentElement.classList.remove('app-dark');
+    },
     mounted() {
         this.merchant_name = 'MERCHANT_NAME';
 
@@ -504,7 +508,7 @@ export default {
                 </a>
                 <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-3">
                     <button type="button" class="flex items-center justify-center border rounded-full w-20 h-11 hover:border-slate-500 hover:dark:text-slate-200 group" @click="toggleDarkMode">
-                        <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }, 'group-hover:text-slate-500 group-hover:dark:text-slate-200']"></i>
+                        <i :class="['pi', { 'pi-moon': !isDarkTheme, 'pi-sun': isDarkTheme }, 'group-hover:text-slate-500 group-hover:dark:text-slate-200']"></i>
                     </button>
                     <Button label="Logout" severity="secondary" rounded class="w-24"></Button>
                 </div>
