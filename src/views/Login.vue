@@ -1,19 +1,21 @@
 <!-- eslint-disable no-unused-vars -->
 <script>
-import router from '@/router';
-import AuthService from '@/services/AuthService';
 import useVuelidate from '@vuelidate/core';
 import { required } from '@vuelidate/validators';
+import axios from 'axios';
 
 export default {
     setup() {
         return {
-            v$: useVuelidate()
+            v$: useVuelidate(),
+            API_URL: import.meta.env.VITE_BASE_URL
         };
     },
     data() {
         return {
             loading: false,
+            failed_counter: 0,
+            requires_captcha: false,
             formData: {
                 user: '',
                 password: ''
@@ -42,11 +44,18 @@ export default {
             this.loading = true;
 
             try {
-                await AuthService.login(this.formData);
+                let result = await axios
+                    .post(this.API_URL + '/login', {
+                        username: this.formData.username,
+                        password: this.formData.password
+                    })
+                    .then((result) => result.data);
 
-                router.push('/');
+                localStorage.setItem('qris-merchant-user-token', result.authorization.token);
+                localStorage.setItem('qris-merchant-user-data', JSON.stringify(result.user));
             } catch (error) {
-                this.$toast.add({ severity: 'error', summary: 'Error', detail: error, life: 3000 });
+                this.failed_counter++;
+                throw new Error(error.response?.data?.message || 'Login failed');
             } finally {
                 this.loading = false;
             }

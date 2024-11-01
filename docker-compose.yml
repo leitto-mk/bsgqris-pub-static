@@ -1,6 +1,6 @@
 services:
   qris-merchant-v2-fe:
-    image: container.banksulutgo.co.id:5000/qris-merchant-v2-fe:latest
+    image: container.banksulutgo.co.id:5000/qris-merchant-pub-fe:latest
     ports:
       - "9090:80"
     restart: always

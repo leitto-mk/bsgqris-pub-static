@@ -10,6 +10,7 @@
     },
     "dependencies": {
         "@primevue/themes": "^4.0.0",
+        "@thumbmarkjs/thumbmarkjs": "^0.16.0",
         "@vuelidate/core": "^2.0.3",
         "@vuelidate/validators": "^2.0.4",
         "axios": "^1.7.3",
