@@ -34,6 +34,8 @@ export default {
             //Outlet
             outlets: [],
             active_outlet: null,
+            outlet_show_terminal_list: false,
+            outlet_show_add_dialog: false,
 
             //Transactions
             trx: {
@@ -208,40 +210,6 @@ export default {
         }
     },
     methods: {
-        emptyState() {
-            this.qris_state = false;
-            this.transactions_state = false;
-            this.terminal_state = false;
-        },
-        getAmountFormatting(amount) {
-            return new Intl.NumberFormat('id-ID', {
-                style: 'currency',
-                currency: 'IDR',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(amount);
-        },
-        getBalance() {
-            if (this.shown) {
-                this.shown = false;
-                return;
-            }
-
-            this.skeleton = true;
-
-            setTimeout(() => {
-                this.amount = 5000000;
-
-                this.skeleton = false;
-                this.shown = true;
-            }, 3000);
-
-            setTimeout(() => {
-                this.skeleton = false;
-                this.shown = false;
-            }, 10000);
-        },
-
         //Outlet
         getOutlet() {
             try {
@@ -355,7 +323,7 @@ export default {
                                 user: {
                                     xid: 3,
                                     kd_user: 'ABC4123',
-                                    status: 2
+                                    status: 1
                                 }
                             }
                         ]
@@ -370,6 +338,47 @@ export default {
                     life: 10000
                 });
             }
+        },
+        getUnregisterdTerminal(outlet) {
+            return outlet.terminal.reduce((count, terminal) => {
+                return count + (terminal.user.status === 2 ? 1 : 0);
+            }, 0);
+        },
+        confirmReset(user) {
+            this.$confirm.require({
+                message: `Apakah anda yakin untuk mengganti perangkat untuk user [${user}] ?`,
+                header: 'Ganti Perangkat',
+                icon: 'pi pi-exclamation-triangle',
+                acceptProps: {
+                    label: 'Ganti'
+                },
+                rejectProps: {
+                    label: 'Tutup',
+                    severity: 'secondary',
+                    outlined: true
+                },
+                accept: () => {
+                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Perangkat berhasil diganti, silahkan login menggunakan perangkat baru', life: 3000 });
+                }
+            });
+        },
+        confirmDelete() {
+            this.$confirm.require({
+                message: 'Apakah anda yakin untuk menghapus user ini ?',
+                header: 'Hapus User',
+                icon: 'pi pi-exclamation-triangle',
+                acceptProps: {
+                    label: 'Hapus'
+                },
+                rejectProps: {
+                    label: 'Tutup',
+                    severity: 'secondary',
+                    outlined: true
+                },
+                accept: () => {
+                    this.$toast.add({ severity: 'success', summary: 'Success', detail: 'Perangkat berhasil dihapus', life: 3000 });
+                }
+            });
         },
 
         //Transactions
@@ -483,6 +492,8 @@ export default {
 </script>
 
 <template>
+    <Toast />
+    <ConfirmDialog></ConfirmDialog>
     <Fluid class="layout-menu bg-white dark:bg-zinc-900 h-svh">
         <div
             class="h-full w-full fixed"
@@ -544,93 +555,139 @@ export default {
                         <TabPanels>
                             <TabPanel value="outlet">
                                 <div class="flex flex-row gap-2">
-                                    <div :class="['flex flex-col pt-5 gap-5', active_outlet ? 'basis-5/6' : 'w-full']">
-                                        <div v-for="outlet in outlets" :key="outlet.XID">
-                                            <div
-                                                :class="[
-                                                    active_outlet && active_outlet.XID !== outlet.XID ? 'hidden' : 'flex',
-                                                    'flex-col gap-1 justify-between border border-slate-300 p-5 shadow-sm rounded-xl w-full hover:border-2 hover:border-red-300 hover:dark:border-red-400 hover:cursor-pointer'
-                                                ]"
-                                            >
+                                    <div :class="['flex flex-col pt-5 gap-5', outlet_show_terminal_list ? 'basis-5/6' : 'w-full']">
+                                        <!-- OUTLET LIST -->
+                                        <div v-for="outlet in outlets" :key="outlet.XID" :class="[outlet_show_terminal_list && active_outlet.XID !== outlet.XID ? 'hidden' : 'block']">
+                                            <div class="'flex flex-col gap-1 justify-between border border-slate-300 p-5 shadow-sm rounded-xl w-full hover:border-2 hover:border-red-300 hover:dark:border-red-400 hover:cursor-pointer'">
                                                 <div class="flex flex-row justify-between">
+                                                    <!-- OUTLET INFO -->
                                                     <div class="flex flex-row gap-1">
-                                                        <span class="font-bold">{{ outlet.outlatName }}</span>
+                                                        <span class="font-bold min-w-40 max-w-80 uppercase truncate">{{ outlet.outlatName }}</span>
                                                         <Divider layout="vertical" />
                                                         <div class="flex flex-row gap-2 text-">
                                                             <span class="pi pi-calendar mt-1 text-slate-500 dark:text-slate-300" />
                                                             <span class="text-slate-500 dark:text-slate-200">{{ outlet.tanggal_terdaftar }}</span>
                                                         </div>
                                                         <Divider layout="vertical" />
-                                                        <span>{{ outlet.outlatAddress }}</span>
+                                                        <span class="min-w-40 max-w-80 uppercase truncate">{{ outlet.outlatAddress }}</span>
                                                     </div>
+                                                    <!-- OUTLET ACTION -->
                                                     <div class="flex flex-wrap gap-2">
+                                                        <div
+                                                            v-if="getUnregisterdTerminal(outlet)"
+                                                            class="flex items-center justify-center -mt-1 -mb-2 w-10 h-10 border border-orange-500 rounded-full text-sm animate-pulse"
+                                                            v-tooltip.top="'Menunggu Aktivasi'"
+                                                        >
+                                                            {{ getUnregisterdTerminal(outlet) }}
+                                                        </div>
                                                         <div class="-mt-1 -mb-2" v-tooltip.top="'Tambah Perangkat'">
-                                                            <Button icon="pi pi-plus" severity="success" rounded size="small" outlined />
+                                                            <Button
+                                                                icon="pi pi-plus"
+                                                                severity="success"
+                                                                rounded
+                                                                size="small"
+                                                                outlined
+                                                                @click="
+                                                                    outlet_show_add_dialog = true;
+                                                                    active_outlet = outlet;
+                                                                "
+                                                            />
                                                         </div>
-                                                        <div v-if="!active_outlet" class="-mt-1 -mb-2" v-tooltip.top="'Daftar Perangkat'" @click="active_outlet = outlet">
+                                                        <div
+                                                            v-if="!outlet_show_terminal_list"
+                                                            class="-mt-1 -mb-2"
+                                                            v-tooltip.top="'Daftar User/Perangkat'"
+                                                            @click="
+                                                                outlet_show_terminal_list = true;
+                                                                active_outlet = outlet;
+                                                            "
+                                                        >
                                                             <Button icon="pi pi-list" severity="info" rounded size="small" outlined />
-                                                        </div>
-                                                        <div v-if="active_outlet && active_outlet.XID === outlet.XID" class="-mt-1 -mb-2" v-tooltip.top="'Tutup Daftar'">
-                                                            <Button icon="pi pi-times" severity="secondary" rounded size="small" outlined @click="active_outlet = null" />
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <Divider v-if="active_outlet" layout="vertical" />
-                                    <div v-if="active_outlet" class="flex flex-col pt-5 gap-3 basis-2/6">
+                                    <Divider v-if="outlet_show_terminal_list" layout="vertical" />
+                                    <div v-if="outlet_show_terminal_list" class="flex flex-col pt-5 gap-3 basis-2/6">
+                                        <!--EXIT TERMINAL LIST -->
+                                        <Button icon="pi pi-times" severity="secondary" rounded v-tooltip.top="'Tutup Daftar'" @click="outlet_show_terminal_list = false" />
+                                        <!-- TERMINAL LIST -->
                                         <div
                                             v-for="terminal in active_outlet.terminal"
                                             :key="terminal.TerminalID"
-                                            class="flex flex-row justify-between border border-slate-300 p-5 shadow-sm rounded-2xl w-full hover:border-2 hover:border-red-300 hover:dark:border-red-400"
+                                            :class="[
+                                                'flex ',
+                                                'flex-row ',
+                                                'justify-between ',
+                                                'border ',
+                                                terminal.user.status === 1 ? 'border-slate-300 ' : 'border-orange-500',
+                                                'p-5 ',
+                                                'shadow-sm ',
+                                                'rounded-2xl ',
+                                                'w-full ',
+                                                'hover:border-2 ',
+                                                'hover:border-red-300 ',
+                                                'hover:dark:border-red-400'
+                                            ]"
                                         >
+                                            <!-- TERMINAL NAME -->
                                             <div class="flex flex-row gap-1">
                                                 <div class="flex flex-row gap-2 text-">
-                                                    <span class="text-slate-700 dark:text-slate-200 font-bold mt-1">{{ terminal.user.kd_user }}</span>
+                                                    <span class="text-slate-700 dark:text-slate-200 font-bold mt-1" v-tooltip.top="'Username'">{{ terminal.user.kd_user }}</span>
                                                 </div>
                                                 <Divider layout="vertical" />
-                                                <Tag severity="secondary" :value="terminal.TerminalID" />
+                                                <Tag severity="secondary" :value="terminal.TerminalID" v-tooltip.top="'ID Terminal'" />
                                             </div>
+                                            <!-- TERMINAL ACTION -->
                                             <div class="flex flex-wrap gap-2">
-                                                <div v-if="terminal.user.status === 2" class="-mt-1 -mb-2" v-tooltip.top="'Menunggu Aktivasi'">
+                                                <div v-if="terminal.user.status === 2" class="-mt-1 -mb-2 animate-pulse" v-tooltip.top="'Menunggu Aktivasi'">
                                                     <Button icon="pi pi-info" severity="warn" size="small" outlined rounded />
                                                 </div>
                                                 <div v-if="terminal.user.status === 1" class="-mt-1 -mb-2" v-tooltip.top="'Ganti Perangkat'">
-                                                    <Button icon="pi pi-clone" severity="info" size="small" outlined rounded />
+                                                    <Button icon="pi pi-clone" severity="info" size="small" outlined rounded @click="confirmReset(terminal.user.kd_user)" />
                                                 </div>
-                                                <div v-if="terminal.user.status === 1" class="-mt-1 -mb-2" v-tooltip.top="'Hapus Perangkat'">
-                                                    <Button icon="pi pi-trash" severity="danger" size="small" outlined rounded />
+                                                <div v-if="terminal.user.status === 1" class="-mt-1 -mb-2" v-tooltip.top="'Hapus User'">
+                                                    <Button icon="pi pi-user-minus" severity="danger" size="small" outlined rounded @click="confirmDelete()" />
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </TabPanel>
+                            <!-- TRANSACTION PANEL -->
                             <TabPanel value="transaksi">
                                 <div :class="['flex flex-row gap-3 my-5', trx.trx_date_range_type !== 'Rentang' ? 'ml-0' : '']">
+                                    <!-- RANGE SELECTION -->
                                     <SelectButton v-model="trx.trx_date_range_type" :options="['Hari ini', '1 Minggu', '1 Bulan', 'Rentang']" aria-labelledby="basic" class="shadow-md" />
+                                    <!-- DATE RANGE SELECTION -->
                                     <div v-if="trx.trx_date_range_type === 'Rentang'" class="flex flex-row gap-2">
                                         <Divider layout="vertical" />
+                                        <!-- DATE START -->
                                         <div
                                             class="rounded-xl p-2 border text-slate-500 dark:text-slate-300 text-base 2xl:text-xl text-center hover:border-slate-900 dark:hover:border-slate-100 hover:font-bold shadow-md hover:cursor-pointer"
                                             :class="[trx.trx_date_range_pos == 'from' ? 'border-2 border-blue-300 dark:border-sky-500' : 'border-slate-300 dark:border-slate-500']"
                                             @click="trx.trx_date_range_pos = 'from'"
+                                            v-tooltip.top="'Tanggal Awal'"
                                         >
                                             {{ trx.trx_year_start ? moment(trx.trx_year_start, 'YYYY').format('YYYY') : '??' }} / {{ trx.trx_month_start ? moment(trx.trx_month_start, 'M').format('MM') : '??' }} /
                                             {{ trx.trx_day_start ? moment(trx.trx_day_start, 'D').format('DD') : '??' }}
                                         </div>
                                         <span class="pi pi-arrow-right flex items-center justify-center"></span>
+                                        <!-- DATE END -->
                                         <div
                                             class="rounded-xl p-2 border text-slate-500 dark:text-slate-300 text-base 2xl:text-xl text-center hover:border-slate-900 dark:hover:border-slate-100 hover:font-bold shadow-md hover:cursor-pointer"
                                             :class="[trx.trx_date_range_pos == 'to' ? 'border-2 border-blue-300 dark:border-sky-500' : 'border-slate-300 dark:border-slate-500']"
                                             @click="trx.trx_date_range_pos = 'to'"
+                                            v-tooltip.top="'Tanggal Akhir'"
                                         >
                                             {{ trx.trx_year_end ? moment(trx.trx_year_end, 'YYYY').format('YYYY') : '??' }} / {{ trx.trx_month_end ? moment(trx.trx_month_end, 'M').format('MM') : '??' }} /
                                             {{ trx.trx_day_end ? moment(trx.trx_day_end, 'D').format('DD') : '??' }}
                                         </div>
                                     </div>
                                 </div>
+                                <!-- CAROUSEL -->
                                 <Carousel
                                     v-if="trx.trx_date_range_type === 'Rentang' && !isDateSpecified"
                                     :value="trx.trx_dates"
@@ -643,6 +700,7 @@ export default {
                                     :responsiveOptions="trx.responsiveOptions"
                                 >
                                     <template #header>
+                                        <!-- YEARS SELECTION -->
                                         <div v-if="trx.trx_date_range_type === 'Rentang'" class="flex flex-row gap-3">
                                             <div v-for="year in trx.trx_years" :key="year">
                                                 <div
@@ -658,6 +716,7 @@ export default {
                                                 </div>
                                             </div>
                                         </div>
+                                        <!-- MONTHS SELECTION -->
                                         <div v-if="trx.trx_date_range_type === 'Rentang'" class="flex flex-row gap-3 my-5">
                                             <div
                                                 v-for="month in trx.trx_months"
@@ -674,6 +733,7 @@ export default {
                                         </div>
                                     </template>
                                     <template #item="slotProps">
+                                        <!-- DAY SELECTION -->
                                         <div
                                             v-if="trx.trx_date_range_type === 'Rentang' && !isDateSpecified"
                                             :class="[
@@ -692,6 +752,7 @@ export default {
                                             ]"
                                             @click="trx.trx_day_start ? (trx.trx_day_end = +moment(slotProps.data.date, 'YYYY-MM-DD').format('D')) : (trx.trx_day_start = +moment(slotProps.data.date, 'YYYY-MM-DD').format('D'))"
                                         >
+                                            <!-- DAY DIGIT -->
                                             <span
                                                 :class="[
                                                     'font-bold',
@@ -706,6 +767,7 @@ export default {
                                                 >{{ moment(slotProps.data.date, 'YYYY-MM-DD').format('DD') }}</span
                                             >
                                             <Divider />
+                                            <!-- MONTH + YEAR -->
                                             <span
                                                 :class="[
                                                     'text-slate-400',
@@ -723,8 +785,9 @@ export default {
                                     </template>
                                 </Carousel>
                                 <div v-if="isDateSpecified" class="flex flex-row gap-7 mt-8">
+                                    <!-- LEFT START DATE CARD -->
                                     <div class="flex flex-col gap-3">
-                                        <div class="flex flex-col shadow-md rounded-xl p-5 border border-slate-500 hover:border-2 hover:border-slate-500 hover:cursor-pointer hover:bg-slate-500 hover:transition-all duration-900 group h-fit">
+                                        <div class="flex flex-col shadow-md rounded-xl p-5 border border-slate-500 hover:border-2 hover:border-slate-500 hover:cursor-pointer hover:bg-slate-500 duration-900 group h-fit">
                                             <div
                                                 @click="
                                                     trx.trx_day_start = null;
@@ -757,9 +820,10 @@ export default {
                                             <span class="group-hover:text-slate-400 text-slate-500 font-bold text-lg text-center">{{ moment(`${trx.trx_year_start}-${trx.trx_month_start}-${trx.trx_day_start}`, 'YYYY-M-D').format('MMM YYYY') }}</span>
                                         </div>
                                         <div v-if="trx.trx_date_range_type !== 'Hari ini'" class="pi pi-arrow-down flex items-center justify-center text-2xl"></div>
+                                        <!-- LEFT END DATE CARD -->
                                         <div
                                             v-if="trx.trx_date_range_type !== 'Hari ini'"
-                                            class="flex flex-col shadow-md rounded-xl p-5 border border-slate-500 hover:border-2 hover:border-slate-500 hover:cursor-pointer hover:bg-slate-500 hover:transition-all duration-900 group h-fit"
+                                            class="flex flex-col shadow-md rounded-xl p-5 border border-slate-500 hover:border-2 hover:border-slate-500 hover:cursor-pointer hover:bg-slate-500 duration-900 group h-fit"
                                         >
                                             <div
                                                 @click="
@@ -793,6 +857,7 @@ export default {
                                             <span class="group-hover:text-slate-400 text-slate-500 font-bold text-lg text-center">{{ moment(`${trx.trx_year_end}-${trx.trx_month_end}-${trx.trx_day_end}`, 'YYYY-M-D').format('MMM YYYY') }}</span>
                                         </div>
                                     </div>
+                                    <!-- TRANSACTION HISTORY LIST -->
                                     <div class="flex flex-col gap-3 w-full">
                                         <div class="flex flex-row gap-5 justify-between shadow-sm rounded-xl border border-slate-300 dark:border-slate-500 w-full p-3">
                                             <div class="pi pi-arrow-down-right text-green-500 mt-1 ml-2"></div>
@@ -874,6 +939,52 @@ export default {
                             </TabPanel>
                         </TabPanels>
                     </Tabs>
+                    <Dialog v-model:visible="outlet_show_add_dialog" modal header="Penambahan Perangkat" :style="{ width: '50rem' }">
+                        <div class="card flex justify-center pt-2">
+                            <Stepper value="1" class="basis-[50rem]">
+                                <StepList>
+                                    <Step value="1">Ketentuan</Step>
+                                    <Step value="2">Dikirim</Step>
+                                </StepList>
+                                <StepPanels>
+                                    <StepPanel v-slot="{ activateCallback }" value="1">
+                                        <div class="flex flex-col gap-3 h-fit">
+                                            <div class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 p-5">
+                                                Anda akan melakukan penambahan perangkat pada Outlet <span class="font-bold">{{ active_outlet.outlatName }}</span>
+                                                <br />
+                                                <br />
+                                                Adapun Ketentuan yang <span class="font-bold">perlu diperhatikan</span> adalah sebagai berikut : .
+                                                <li>Terminal dibuat per Perangkat yang bersifat Dinamis (Closed Amount)</li>
+                                                <li>Akses username untuk perangkat baru akan dikirimkan pada email yang telah terdaftar</li>
+                                                <li>Akses username yang sudah aktif, <span class="font-bold">hanya dapat</span> digunakan pada perangkat yg terdaftar</li>
+                                                <br />
+                                                Jika telah menyetujui, silahkan klik tombol <span class="font-bold">selanjutnya</span>.
+                                            </div>
+                                        </div>
+                                        <div class="flex pt-6 gap-3 justify-end">
+                                            <Button label="Selanjutnya" icon="pi pi-arrow-right" iconPos="right" @click="activateCallback('2')" />
+                                        </div>
+                                    </StepPanel>
+                                    <StepPanel v-slot="{ activateCallback }" value="2">
+                                        <div class="flex flex-col h-48">
+                                            <div class="border-2 border-dashed border-surface-200 dark:border-surface-700 rounded bg-surface-50 dark:bg-surface-950 p-5">
+                                                Username telah dikirimkan pada email berikut:
+                                                <br />
+                                                <br />
+                                                <div class="flex flex-wrap justify-center items-center font-bold text-lg">your.email@gmail.com</div>
+                                                <br />
+                                                Silahkan periksa email anda untuk melihat username yang telah dikirimkan. jika email tidak ditemukan, silahkan cek folder spam.
+                                            </div>
+                                        </div>
+                                        <div class="flex pt-6 gap-3 justify-between">
+                                            <Button label="Kembali" severity="secondary" icon="pi pi-arrow-left" @click="activateCallback('1')" />
+                                            <Button label="Tutup" icon="pi pi-times" iconPos="right" @click="outlet_show_add_dialog = false" />
+                                        </div>
+                                    </StepPanel>
+                                </StepPanels>
+                            </Stepper>
+                        </div>
+                    </Dialog>
                 </div>
             </div>
         </div>
