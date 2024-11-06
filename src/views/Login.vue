@@ -1,14 +1,23 @@
 <!-- eslint-disable no-unused-vars -->
 <script>
+import { useLayout } from '@/layout/composables/layout';
 import useVuelidate from '@vuelidate/core';
 import { required } from '@vuelidate/validators';
 import axios from 'axios';
+import DashboardLogoDark from '../assets/dashboard-dark.png';
+import DashboardLogoLight from '../assets/dashboard-light.png';
 
 export default {
     setup() {
+        const { toggleDarkMode, isDarkTheme } = useLayout();
+
         return {
             v$: useVuelidate(),
-            API_URL: import.meta.env.VITE_BASE_URL
+            API_URL: import.meta.env.VITE_BASE_URL,
+            DashboardLogoDark: DashboardLogoDark,
+            DashboardLogoLight: DashboardLogoLight,
+            toggleDarkMode: toggleDarkMode,
+            isDarkTheme: isDarkTheme
         };
     },
     data() {
@@ -67,16 +76,30 @@ export default {
 <template>
     <FloatingConfigurator />
     <Toast position="top-left" />
-    <div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden">
+    <div
+        class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw] overflow-hidden"
+        style="
+            background: rgb(0, 0, 0);
+            background: linear-gradient(
+                149deg,
+                rgba(0, 0, 0, 0.9473039215686274) 0%,
+                rgba(84, 15, 5, 0.8660714285714286) 48%,
+                rgba(137, 32, 18, 0.8576680672268908) 66%,
+                rgba(166, 41, 25, 0.8548669467787114) 86%,
+                rgba(201, 34, 13, 0.7204131652661064) 100%
+            );
+        "
+    >
         <div class="flex flex-col items-center justify-center">
             <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
-                <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
+                <div class="w-full bg-surface-0 dark:bg-surface-900 py-28 px-8 sm:px-20" style="border-radius: 53px">
                     <form @submit.prevent="login">
                         <div class="text-center mb-8">
-                            <div class="flex items-center justify-center mb-10">
-                                <img src="@/assets/icon.png" alt="" class="w-36" />
+                            <div class="flex items-center justify-center mb-20">
+                                <!-- <img src="@/assets/icon.png" alt="" class="w-36" /> -->
+                                <img v-if="isDarkTheme" src="@/assets/dashboard-light.png" alt="" class="w-[25%] absolute" />
+                                <img v-else-if="!isDarkTheme" src="@/assets/dashboard-dark.png" alt="" class="w-[25%] absolute" />
                             </div>
-                            <div class="text-surface-900 dark:text-surface-300 text-3xl font-medium">QRIS Merchant Management</div>
                             <!-- <span class="text-muted-color font-medium">Sign in to continue</span> -->
                         </div>
                         <div>

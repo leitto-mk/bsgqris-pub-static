@@ -216,7 +216,9 @@ export default {
         getAmountFormatting(amount) {
             return new Intl.NumberFormat('id-ID', {
                 style: 'currency',
-                currency: 'IDR'
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
             }).format(amount);
         },
         getBalance() {
@@ -562,11 +564,11 @@ export default {
                                                         <span>{{ outlet.outlatAddress }}</span>
                                                     </div>
                                                     <div class="flex flex-wrap gap-2">
-                                                        <div class="-mt-1 -mb-2" v-tooltip.top="'Daftar Perangkat'" @click="active_outlet = outlet">
-                                                            <Button icon="pi pi-list" severity="info" rounded size="small" outlined />
-                                                        </div>
                                                         <div class="-mt-1 -mb-2" v-tooltip.top="'Tambah Perangkat'">
                                                             <Button icon="pi pi-plus" severity="success" rounded size="small" outlined />
+                                                        </div>
+                                                        <div v-if="!active_outlet" class="-mt-1 -mb-2" v-tooltip.top="'Daftar Perangkat'" @click="active_outlet = outlet">
+                                                            <Button icon="pi pi-list" severity="info" rounded size="small" outlined />
                                                         </div>
                                                         <div v-if="active_outlet && active_outlet.XID === outlet.XID" class="-mt-1 -mb-2" v-tooltip.top="'Tutup Daftar'">
                                                             <Button icon="pi pi-times" severity="secondary" rounded size="small" outlined @click="active_outlet = null" />
