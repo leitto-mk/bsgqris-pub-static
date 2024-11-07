@@ -96,6 +96,10 @@ export default {
         this.trx.date_range_type = 'Hari ini';
     },
     computed: {
+        /**
+         * Check whether the date is fully specified, that includes date range
+         * which requires both start and end date.
+         */
         isDateSpecified() {
             switch (this.trx.date_range_type) {
                 case 'Hari ini':
@@ -103,18 +107,14 @@ export default {
                 case '1 Minggu':
                 case '1 Bulan':
                 case 'Rentang':
-                    return (
-                        moment(this.trx.year_start, 'YYYY').isValid() &&
-                        moment(this.trx.month_start, 'M').isValid() &&
-                        moment(this.trx.day_start, 'D').isValid() &&
-                        moment(this.trx.year_end, 'YYYY').isValid() &&
-                        moment(this.trx.month_end, 'M').isValid() &&
-                        moment(this.trx.day_end, 'D').isValid()
-                    );
+                    return moment(`${this.trx.year_start}-${this.trx.month_start}-${this.trx.day_start_start}`, 'YYYY-M-D').isValid() && moment(`${this.trx.year_start}-${this.trx.month_start}-${this.trx.day_start_start}`, 'YYYY-M-D').isValid();
                 default:
                     return false;
             }
         },
+        /**
+         * Carousel page position based on current date
+         */
         getCarouselDatePosition() {
             const current_date = +moment().format('D');
 
@@ -129,9 +129,6 @@ export default {
             } else {
                 return 4;
             }
-        },
-        getDateSpecified() {
-            return `${this.trx.year_start}-${this.trx.month_start}-${this.trx.day_start}`; //YYYY-M-DD
         }
     },
     watch: {
