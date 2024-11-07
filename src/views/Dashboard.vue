@@ -39,19 +39,20 @@ export default {
 
             //Transactions
             trx: {
-                trx_years: [],
-                trx_months: [],
-                trx_date_type: 'Single',
-                trx_date_range_type: null,
-                trx_date_range_pos: 'from',
-                trx_carousel_position: 0,
-                trx_month_start: null, //1 - 12
-                trx_year_start: null, //YYYY
-                trx_day_start: null, //1 - 9
-                trx_month_end: null, //1 - 12
-                trx_year_end: null, //YYYY
-                trx_day_end: null, //1 - 9
-                trx_dates: [],
+                years: [],
+                months: [],
+                dates: [],
+                date_type: 'Single',
+                date_range_type: null,
+                date_range_pos: 'from',
+                carousel_position: 0,
+                date_compact: null,
+                month_start: null, //1 - 12
+                year_start: null, //YYYY
+                day_start: null, //1 - 9
+                month_end: null, //1 - 12
+                year_end: null, //YYYY
+                day_end: null, //1 - 9
                 responsiveOptions: [
                     {
                         breakpoint: '1400px',
@@ -87,22 +88,29 @@ export default {
         this.getOutlet();
         this.generateCalendar();
 
-        this.trx.trx_carousel_position = this.getCarouselDatePosition;
-        this.trx.trx_month_start = +moment().format('M');
-        this.trx.trx_year_start = +moment().format('YYYY');
+        this.trx.carousel_position = this.getCarouselDatePosition;
+        this.trx.month_start = +moment().format('M');
+        this.trx.year_start = +moment().format('YYYY');
         this.getTrxDates();
 
-        this.trx.trx_date_range_type = 'Hari ini';
+        this.trx.date_range_type = 'Hari ini';
     },
     computed: {
         isDateSpecified() {
-            switch (this.trx.trx_date_range_type) {
+            switch (this.trx.date_range_type) {
                 case 'Hari ini':
-                    return this.trx.trx_year_start && this.trx.trx_month_start && this.trx.trx_day_start;
+                    return this.trx.year_start && this.trx.month_start && this.trx.day_start;
                 case '1 Minggu':
                 case '1 Bulan':
                 case 'Rentang':
-                    return this.trx.trx_year_start && this.trx.trx_month_start && this.trx.trx_day_start && this.trx.trx_year_end && this.trx.trx_month_end && this.trx.trx_day_end;
+                    return (
+                        moment(this.trx.year_start, 'YYYY').isValid() &&
+                        moment(this.trx.month_start, 'M').isValid() &&
+                        moment(this.trx.day_start, 'D').isValid() &&
+                        moment(this.trx.year_end, 'YYYY').isValid() &&
+                        moment(this.trx.month_end, 'M').isValid() &&
+                        moment(this.trx.day_end, 'D').isValid()
+                    );
                 default:
                     return false;
             }
@@ -123,87 +131,95 @@ export default {
             }
         },
         getDateSpecified() {
-            return `${this.trx.trx_year_start}-${this.trx.trx_month_start}-${this.trx.trx_day_start}`; //YYYY-M-DD
+            return `${this.trx.year_start}-${this.trx.month_start}-${this.trx.day_start}`; //YYYY-M-DD
         }
     },
     watch: {
-        'trx.trx_date_type'() {
-            this.trx.trx_year_start = null;
-            this.trx.trx_month_start = null;
-            this.trx.trx_day_start = null;
+        'trx.date_type'() {
+            this.trx.year_start = null;
+            this.trx.month_start = null;
+            this.trx.day_start = null;
 
-            this.trx.trx_year_end = null;
-            this.trx.trx_month_end = null;
-            this.trx.trx_day_end = null;
+            this.trx.year_end = null;
+            this.trx.month_end = null;
+            this.trx.day_end = null;
         },
-        'trx.trx_date_range_type'(value) {
+        'trx.date_range_type'(value) {
             switch (value) {
                 case 'Hari ini':
-                    this.trx.trx_year_start = +moment().format('YYYY');
-                    this.trx.trx_month_start = +moment().format('M');
-                    this.trx.trx_day_start = +moment().format('D');
+                    this.trx.year_start = +moment().format('YYYY');
+                    this.trx.month_start = +moment().format('M');
+                    this.trx.day_start = +moment().format('D');
                     break;
                 case '1 Minggu':
-                    this.trx.trx_year_start = +moment().subtract(7, 'days').format('YYYY');
-                    this.trx.trx_month_start = +moment().subtract(7, 'days').format('M');
-                    this.trx.trx_day_start = +moment().subtract(7, 'days').format('D');
-                    this.trx.trx_year_end = +moment().format('YYYY');
-                    this.trx.trx_month_end = +moment().format('M');
-                    this.trx.trx_day_end = +moment().format('D');
+                    this.trx.year_start = +moment().subtract(7, 'days').format('YYYY');
+                    this.trx.month_start = +moment().subtract(7, 'days').format('M');
+                    this.trx.day_start = +moment().subtract(7, 'days').format('D');
+                    this.trx.year_end = +moment().format('YYYY');
+                    this.trx.month_end = +moment().format('M');
+                    this.trx.day_end = +moment().format('D');
                     break;
                 case '1 Bulan':
-                    this.trx.trx_year_start = +moment().subtract(1, 'month').format('YYYY');
-                    this.trx.trx_month_start = +moment().subtract(1, 'month').format('M');
-                    this.trx.trx_day_start = +moment().subtract(1, 'month').format('D');
-                    this.trx.trx_year_end = +moment().format('YYYY');
-                    this.trx.trx_month_end = +moment().format('M');
-                    this.trx.trx_day_end = +moment().format('D');
+                    this.trx.year_start = +moment().subtract(1, 'month').format('YYYY');
+                    this.trx.month_start = +moment().subtract(1, 'month').format('M');
+                    this.trx.day_start = +moment().subtract(1, 'month').format('D');
+                    this.trx.year_end = +moment().format('YYYY');
+                    this.trx.month_end = +moment().format('M');
+                    this.trx.day_end = +moment().format('D');
                     break;
                 case 'Rentang':
-                    this.trx.trx_date_range_pos = 'from';
-                    this.trx.trx_year_start = null;
-                    this.trx.trx_month_start = null;
-                    this.trx.trx_day_start = null;
-                    this.trx.trx_year_end = null;
-                    this.trx.trx_month_end = null;
-                    this.trx.trx_day_end = null;
+                    this.trx.date_range_pos = 'from';
+                    this.trx.year_start = null;
+                    this.trx.month_start = null;
+                    this.trx.day_start = null;
+                    this.trx.year_end = null;
+                    this.trx.month_end = null;
+                    this.trx.day_end = null;
                     break;
                 default:
-                    this.trx.trx_year_start = null;
-                    this.trx.trx_month_start = null;
-                    this.trx.trx_day_start = null;
-                    this.trx.trx_year_end = null;
-                    this.trx.trx_month_end = null;
-                    this.trx.trx_day_end = null;
+                    this.trx.year_start = null;
+                    this.trx.month_start = null;
+                    this.trx.day_start = null;
+                    this.trx.year_end = null;
+                    this.trx.month_end = null;
+                    this.trx.day_end = null;
                     break;
             }
+        },
+        'trx.date_compact'(value) {
+            this.trx.year_start = moment(value[0]).format('YYYY');
+            this.trx.month_start = moment(value[0]).format('M');
+            this.trx.day_start = moment(value[0]).format('D');
+            this.trx.year_end = moment(value[1]).format('YYYY');
+            this.trx.month_end = moment(value[1]).format('M');
+            this.trx.day_end = moment(value[1]).format('D');
         },
         trx: {
             //Switch Date 'from' and 'to' accordingly
             handler() {
-                if (!this.trx.trx_year_start || !this.trx.trx_month_start || !this.trx.trx_day_start) return;
+                if (!this.trx.year_start || !this.trx.month_start || !this.trx.day_start) return;
 
-                if (this.trx.trx_date_range_type === 'Rentang' && this.trx.trx_year_start && this.trx.trx_month_start && this.trx.trx_day_start) this.trx.trx_date_range_pos = 'to';
+                if (this.trx.date_range_type === 'Rentang' && this.trx.year_start && this.trx.month_start && this.trx.day_start) this.trx.date_range_pos = 'to';
 
-                if (!this.trx.trx_year_end || !this.trx.trx_month_end || !this.trx.trx_day_end) return;
+                if (!this.trx.year_end || !this.trx.month_end || !this.trx.day_end) return;
 
-                const date_from = moment(`${this.trx.trx_year_start}-${this.trx.trx_month_start}-${this.trx.trx_day_start}`, 'YYYY-M-D');
-                const date_to = moment(`${this.trx.trx_year_end}-${this.trx.trx_month_end}-${this.trx.trx_day_end}`, 'YYYY-M-D');
+                const date_from = moment(`${this.trx.year_start}-${this.trx.month_start}-${this.trx.day_start}`, 'YYYY-M-D');
+                const date_to = moment(`${this.trx.year_end}-${this.trx.month_end}-${this.trx.day_end}`, 'YYYY-M-D');
 
                 if (moment(date_from, 'YYYY-M-D').isAfter(moment(date_to, 'YYYY-M-D'), 'd')) {
-                    const year_start = this.trx.trx_year_end;
-                    const month_start = this.trx.trx_month_end;
-                    const day_start = this.trx.trx_day_end;
-                    const year_end = this.trx.trx_year_start;
-                    const month_end = this.trx.trx_month_start;
-                    const day_end = this.trx.trx_day_start;
+                    const year_start = this.trx.year_end;
+                    const month_start = this.trx.month_end;
+                    const day_start = this.trx.day_end;
+                    const year_end = this.trx.year_start;
+                    const month_end = this.trx.month_start;
+                    const day_end = this.trx.day_start;
 
-                    this.trx.trx_year_start = year_start;
-                    this.trx.trx_month_start = month_start;
-                    this.trx.trx_day_start = day_start;
-                    this.trx.trx_year_end = year_end;
-                    this.trx.trx_month_end = month_end;
-                    this.trx.trx_day_end = day_end;
+                    this.trx.year_start = year_start;
+                    this.trx.month_start = month_start;
+                    this.trx.day_start = day_start;
+                    this.trx.year_end = year_end;
+                    this.trx.month_end = month_end;
+                    this.trx.day_end = day_end;
                 }
             },
             deep: true
@@ -382,13 +398,23 @@ export default {
         },
 
         //Transactions
+        emptySpecifiedDate() {
+            this.trx.date_range_pos = 'from';
+
+            this.trx.year_start = null;
+            this.trx.month_start = null;
+            this.trx.day_start = null;
+            this.trx.year_end = null;
+            this.trx.month_end = null;
+            this.trx.day_end = null;
+        },
         generateCalendar() {
-            const current_year = this.trx.trx_year_start;
+            const current_year = this.trx.year_start;
 
             for (let i = 2023; i <= this.moment().year(); i++) {
                 if (i < this.moment().year() - 5) continue; //Stop loop at 5'th Year
 
-                this.trx.trx_years.push(i);
+                this.trx.years.push(i);
             }
 
             const monthsData = [
@@ -407,7 +433,7 @@ export default {
             ];
 
             // Loop through each month and generate the grid structure
-            this.trx.trx_months = monthsData.map((month) => {
+            this.trx.months = monthsData.map((month) => {
                 const totalDays = month.days;
                 const totalWeeks = Math.ceil(totalDays / 7);
 
@@ -430,15 +456,15 @@ export default {
             });
         },
         getTrxDates() {
-            this.trx.trx_dates = [];
-            const month = this.trx.trx_month_start ?? moment().month();
-            const year = this.trx.trx_year_start ?? moment().year();
+            this.trx.dates = [];
+            const month = this.trx.month_start ?? moment().month();
+            const year = this.trx.year_start ?? moment().year();
 
             const startDate = moment(`${year}-${month}`, 'YYYY-M').startOf('month');
             const endDate = moment(`${year}-${month}`, 'YYYY-M').endOf('month');
 
             for (let day = startDate.clone(); day.isSameOrBefore(endDate); day.add(1, 'day')) {
-                this.trx.trx_dates.push({ date: day.format('YYYY-MM-DD') });
+                this.trx.dates.push({ date: day.format('YYYY-MM-DD') });
             }
         },
         getTransations() {
@@ -612,7 +638,7 @@ export default {
                                     <Divider v-if="outlet_show_terminal_list" layout="vertical" />
                                     <div v-if="outlet_show_terminal_list" class="flex flex-col pt-5 gap-3 basis-2/6">
                                         <!--EXIT TERMINAL LIST -->
-                                        <Button icon="pi pi-times" severity="secondary" rounded v-tooltip.top="'Tutup Daftar'" @click="outlet_show_terminal_list = false" />
+                                        <Button icon="pi pi-times" severity="contrast" outlined rounded v-tooltip.top="'Tutup Daftar'" @click="outlet_show_terminal_list = false" />
                                         <!-- TERMINAL LIST -->
                                         <div
                                             v-for="terminal in active_outlet.terminal"
@@ -658,140 +684,175 @@ export default {
                             </TabPanel>
                             <!-- TRANSACTION PANEL -->
                             <TabPanel value="transaksi">
-                                <div :class="['flex flex-row gap-3 my-5', trx.trx_date_range_type !== 'Rentang' ? 'ml-0' : '']">
+                                <div :class="['flex flex-row gap-0 my-5', trx.date_range_type !== 'Rentang' ? 'ml-0' : '']">
                                     <!-- RANGE SELECTION -->
-                                    <SelectButton v-model="trx.trx_date_range_type" :options="['Hari ini', '1 Minggu', '1 Bulan', 'Rentang']" aria-labelledby="basic" class="shadow-md" />
-                                    <!-- DATE RANGE SELECTION -->
-                                    <div v-if="trx.trx_date_range_type === 'Rentang'" class="flex flex-row gap-2">
-                                        <Divider layout="vertical" />
-                                        <!-- DATE START -->
-                                        <div
-                                            class="rounded-xl p-2 border text-slate-500 dark:text-slate-300 text-base 2xl:text-xl text-center hover:border-slate-900 dark:hover:border-slate-100 hover:font-bold shadow-md hover:cursor-pointer"
-                                            :class="[trx.trx_date_range_pos == 'from' ? 'border-2 border-blue-300 dark:border-sky-500' : 'border-slate-300 dark:border-slate-500']"
-                                            @click="trx.trx_date_range_pos = 'from'"
-                                            v-tooltip.top="'Tanggal Awal'"
-                                        >
-                                            {{ trx.trx_year_start ? moment(trx.trx_year_start, 'YYYY').format('YYYY') : '??' }} / {{ trx.trx_month_start ? moment(trx.trx_month_start, 'M').format('MM') : '??' }} /
-                                            {{ trx.trx_day_start ? moment(trx.trx_day_start, 'D').format('DD') : '??' }}
-                                        </div>
-                                        <span class="pi pi-arrow-right flex items-center justify-center"></span>
-                                        <!-- DATE END -->
-                                        <div
-                                            class="rounded-xl p-2 border text-slate-500 dark:text-slate-300 text-base 2xl:text-xl text-center hover:border-slate-900 dark:hover:border-slate-100 hover:font-bold shadow-md hover:cursor-pointer"
-                                            :class="[trx.trx_date_range_pos == 'to' ? 'border-2 border-blue-300 dark:border-sky-500' : 'border-slate-300 dark:border-slate-500']"
-                                            @click="trx.trx_date_range_pos = 'to'"
-                                            v-tooltip.top="'Tanggal Akhir'"
-                                        >
-                                            {{ trx.trx_year_end ? moment(trx.trx_year_end, 'YYYY').format('YYYY') : '??' }} / {{ trx.trx_month_end ? moment(trx.trx_month_end, 'M').format('MM') : '??' }} /
-                                            {{ trx.trx_day_end ? moment(trx.trx_day_end, 'D').format('DD') : '??' }}
-                                        </div>
-                                    </div>
+                                    <SelectButton v-model="trx.date_range_type" :options="['Hari ini', '1 Minggu', '1 Bulan', 'Rentang']" aria-labelledby="basic" class="shadow-md" />
+                                    <Divider v-if="trx.date_range_type === 'Rentang'" layout="vertical" />
+                                    <DatePicker
+                                        v-if="trx.date_range_type === 'Rentang'"
+                                        v-model="trx.date_compact"
+                                        class="w-72"
+                                        selectionMode="range"
+                                        :manualInput="false"
+                                        showIcon
+                                        fluid
+                                        iconDisplay="input"
+                                        placeholder="DD/MM/YYYY,  DD/MM/YYYY"
+                                        v-tooltip.top="'Pilih Rentang Tanggal'"
+                                    >
+                                        <template #inputicon="slotProps">
+                                            <i class="pi pi-calendar" @click="slotProps.clickCallback" />
+                                        </template>
+                                    </DatePicker>
+                                    <Divider v-if="isDateSpecified && trx.date_range_type === 'Rentang'" layout="vertical" />
+                                    <!-- CLOSE SPECIFIED DATE -->
+                                    <Button v-if="isDateSpecified && trx.date_range_type === 'Rentang'" icon="pi pi-times" severity="contrast" rounded outlined @click="emptySpecifiedDate()" v-tooltip.top="'Tutup'" />
                                 </div>
-                                <!-- CAROUSEL -->
-                                <Carousel
-                                    v-if="trx.trx_date_range_type === 'Rentang' && !isDateSpecified"
-                                    :value="trx.trx_dates"
-                                    :numVisible="7"
-                                    :numScroll="7"
-                                    :circular="true"
-                                    v-model:page="trx.trx_carousel_position"
-                                    :showIndicators="false"
-                                    :showNavigators="true"
-                                    :responsiveOptions="trx.responsiveOptions"
-                                >
-                                    <template #header>
-                                        <!-- YEARS SELECTION -->
-                                        <div v-if="trx.trx_date_range_type === 'Rentang'" class="flex flex-row gap-3">
-                                            <div v-for="year in trx.trx_years" :key="year">
+                                <div class="hidden">
+                                    <!-- CAROUSEL -->
+                                    <Carousel
+                                        v-if="trx.date_range_type === 'Rentang' && !isDateSpecified"
+                                        :value="trx.dates"
+                                        :numVisible="7"
+                                        :numScroll="7"
+                                        :circular="true"
+                                        v-model:page="trx.carousel_position"
+                                        :showIndicators="false"
+                                        :showNavigators="true"
+                                        :responsiveOptions="trx.responsiveOptions"
+                                    >
+                                        <template #header>
+                                            <!-- DATE RANGE SELECTION -->
+                                            <div class="flex flex-row gap-3 mb-5">
+                                                <!-- DATE START -->
                                                 <div
+                                                    class="rounded-xl p-2 border text-slate-500 dark:text-slate-300 text-base 2xl:text-xl text-center hover:border-slate-900 dark:hover:border-slate-100 hover:font-bold shadow-md hover:cursor-pointer"
+                                                    :class="[trx.date_range_pos == 'from' ? 'border-2 border-blue-300 dark:border-sky-500' : 'border-slate-300 dark:border-slate-500']"
+                                                    v-tooltip.top="'Tanggal Awal'"
+                                                    @click="trx.date_range_pos = 'from'"
+                                                >
+                                                    <div class="flex flex-row">
+                                                        <icon class="pi pi-calendar-plus flex items-center justify-center ml-2"></icon>
+                                                        <Divider layout="vertical" />
+                                                        <div class="text-center font-bold mr-3">
+                                                            {{ trx.year_start ? moment(trx.year_start, 'YYYY').format('YYYY') : '??' }} / {{ trx.month_start ? moment(trx.month_start, 'M').format('MM') : '??' }} /
+                                                            {{ trx.day_start ? moment(trx.day_start, 'D').format('DD') : '??' }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="pi pi-arrow-right flex items-center justify-center"></span>
+                                                <!-- DATE END -->
+                                                <div
+                                                    class="rounded-xl p-2 border text-slate-500 dark:text-slate-300 text-base 2xl:text-xl text-center hover:border-slate-900 dark:hover:border-slate-100 hover:font-bold shadow-md hover:cursor-pointer"
+                                                    :class="[trx.date_range_pos == 'to' ? 'border-2 border-blue-300 dark:border-sky-500' : 'border-slate-300 dark:border-slate-500']"
+                                                    v-tooltip.top="'Tanggal Akhir'"
+                                                    @click="trx.date_range_pos = 'to'"
+                                                >
+                                                    <div class="flex flex-row">
+                                                        <icon class="pi pi-calendar-plus flex items-center justify-center ml-2"></icon>
+                                                        <Divider layout="vertical" />
+                                                        <div class="text-center font-bold mr-3">
+                                                            {{ trx.year_end ? (moment(trx.year_end, 'YYYY').isValid() ? moment(trx.year_end, 'YYYY').format('YYYY') : '??') : '??' }} /
+                                                            {{ trx.month_end ? (moment(trx.month_end, 'M').isValid() ? moment(trx.month_end, 'M').format('MM') : '??') : '??' }} /
+                                                            {{ trx.day_end ? (moment(trx.day_end, 'D').isValid() ? moment(trx.day_end, 'D').format('DD') : '??') : '??' }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- YEARS SELECTION -->
+                                            <div v-if="trx.date_range_type === 'Rentang'" class="flex flex-row gap-3">
+                                                <div v-for="year in trx.years" :key="year">
+                                                    <div
+                                                        class="rounded-xl border border-slate-300 dark:border-slate-500 py-2 w-32 text-slate-500 dark:text-slate-300 text-base 2xl:text-xl text-center hover:border-slate-900 dark:hover:border-slate-100 hover:font-bold shadow-md hover:cursor-pointer"
+                                                        :class="trx.year_start === year || trx.year_end === year ? 'bg-slate-900 dark:bg-white text-slate-100 dark:text-slate-900' : ''"
+                                                        @click="
+                                                            if (trx.date_range_pos == 'from') trx.year_start = year;
+                                                            else if (trx.date_range_pos == 'to') trx.year_end = year;
+                                                            getTrxDates();
+                                                        "
+                                                    >
+                                                        {{ year }}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- MONTHS SELECTION -->
+                                            <div v-if="trx.date_range_type === 'Rentang'" class="flex flex-row gap-3 my-5">
+                                                <div
+                                                    v-for="month in trx.months"
+                                                    :key="month.index"
                                                     class="rounded-xl border border-slate-300 dark:border-slate-500 py-2 w-32 text-slate-500 dark:text-slate-300 text-base 2xl:text-xl text-center hover:border-slate-900 dark:hover:border-slate-100 hover:font-bold shadow-md hover:cursor-pointer"
-                                                    :class="trx.trx_year_start === year || trx.trx_year_end === year ? 'bg-slate-900 dark:bg-white text-slate-50 dark:text-slate-900' : ''"
+                                                    :class="trx.month_start === month.index || trx.month_end === month.index ? 'bg-slate-900 dark:bg-white text-slate-100 dark:text-slate-900' : ''"
                                                     @click="
-                                                        if (trx.trx_date_range_pos == 'from') trx.trx_year_start = year;
-                                                        else if (trx.trx_date_range_pos == 'to') trx.trx_year_end = year;
+                                                        if (trx.date_range_pos == 'from') trx.month_start = month.index;
+                                                        else if (trx.date_range_pos == 'to') trx.month_end = month.index;
                                                         getTrxDates();
                                                     "
                                                 >
-                                                    {{ year }}
+                                                    {{ month.name }}
                                                 </div>
                                             </div>
-                                        </div>
-                                        <!-- MONTHS SELECTION -->
-                                        <div v-if="trx.trx_date_range_type === 'Rentang'" class="flex flex-row gap-3 my-5">
+                                        </template>
+                                        <template #item="slotProps">
+                                            <!-- DAY SELECTION -->
                                             <div
-                                                v-for="month in trx.trx_months"
-                                                :key="month.index"
-                                                class="rounded-xl border border-slate-300 dark:border-slate-500 py-2 w-32 text-slate-500 dark:text-slate-300 text-base 2xl:text-xl text-center hover:border-slate-900 dark:hover:border-slate-100 hover:font-bold shadow-md hover:cursor-pointer"
-                                                :class="trx.trx_month_start === month.index || trx.trx_month_end === month.index ? 'bg-slate-900 dark:bg-white text-slate-50 dark:text-slate-900' : ''"
-                                                @click="
-                                                    if (trx.trx_date_range_pos == 'from') trx.trx_month_start = month.index;
-                                                    else if (trx.trx_date_range_pos == 'to') trx.trx_month_end = month.index;
-                                                "
+                                                v-if="trx.date_range_type === 'Rentang' && !isDateSpecified"
+                                                :class="[
+                                                    'flex',
+                                                    'flex-col',
+                                                    'p-5',
+                                                    'mx-3',
+                                                    'shadow-md',
+                                                    'rounded-xl',
+                                                    'border',
+                                                    'group',
+                                                    'border-slate-500',
+                                                    'hover:cursor-pointer',
+                                                    'hover:border-2',
+                                                    moment(slotProps.data.date, 'YYYY-MM-DD').isSame(moment(), 'd') ? 'border-2 border-sky-300 dark:border-sky-500 ' : ''
+                                                ]"
+                                                @click="trx.day_start ? (trx.day_end = +moment(slotProps.data.date, 'YYYY-MM-DD').format('D')) : (trx.day_start = +moment(slotProps.data.date, 'YYYY-MM-DD').format('D'))"
                                             >
-                                                {{ month.name }}
+                                                <!-- DAY DIGIT -->
+                                                <span
+                                                    :class="[
+                                                        'font-bold',
+                                                        'text-center',
+                                                        'text-6xl',
+                                                        'p-2',
+                                                        'group-hover:text-8xl',
+                                                        trx.day_start === +moment(slotProps.data.date).format('D') || trx.day_end === +moment(slotProps.data.date).format('D')
+                                                            ? 'text-slate-700 dark:text-slate-100 group-hover:text-slate-700 group-hover:dark:text-slate-100'
+                                                            : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-500 group-hover:dark:text-slate-300'
+                                                    ]"
+                                                    >{{ moment(slotProps.data.date, 'YYYY-MM-DD').format('DD') }}</span
+                                                >
+                                                <Divider />
+                                                <!-- MONTH + YEAR -->
+                                                <span
+                                                    :class="[
+                                                        'text-slate-400',
+                                                        'dark:text-slate-100',
+                                                        'font-bold',
+                                                        'text-3xl',
+                                                        'text-center',
+                                                        trx.day_start === +moment(slotProps.data.date).format('D') || trx.day_end === +moment(slotProps.data.date).format('D')
+                                                            ? 'text-slate-200 dark:text-slate-700'
+                                                            : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-500 group-hover:dark:text-slate-300'
+                                                    ]"
+                                                    >{{ moment(slotProps.data.date, 'YYYY-MM-DD').format('ddd') }}</span
+                                                >
                                             </div>
-                                        </div>
-                                    </template>
-                                    <template #item="slotProps">
-                                        <!-- DAY SELECTION -->
-                                        <div
-                                            v-if="trx.trx_date_range_type === 'Rentang' && !isDateSpecified"
-                                            :class="[
-                                                'flex',
-                                                'flex-col',
-                                                'p-5',
-                                                'mx-3',
-                                                'shadow-md',
-                                                'rounded-xl',
-                                                'border',
-                                                'group',
-                                                'border-slate-500',
-                                                'hover:cursor-pointer',
-                                                'hover:border-2',
-                                                moment(slotProps.data.date, 'YYYY-MM-DD').isSame(moment(), 'd') ? 'border-2 border-sky-300 dark:border-sky-500 ' : ''
-                                            ]"
-                                            @click="trx.trx_day_start ? (trx.trx_day_end = +moment(slotProps.data.date, 'YYYY-MM-DD').format('D')) : (trx.trx_day_start = +moment(slotProps.data.date, 'YYYY-MM-DD').format('D'))"
-                                        >
-                                            <!-- DAY DIGIT -->
-                                            <span
-                                                :class="[
-                                                    'font-bold',
-                                                    'text-center',
-                                                    'text-6xl',
-                                                    'p-2',
-                                                    'group-hover:text-8xl',
-                                                    trx.trx_day_start === +moment(slotProps.data.date).format('D') || trx.trx_day_end === +moment(slotProps.data.date).format('D')
-                                                        ? 'text-slate-600 dark:text-slate-100 group-hover:text-slate-600 group-hover:dark:text-slate-100'
-                                                        : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-500 group-hover:dark:text-slate-300'
-                                                ]"
-                                                >{{ moment(slotProps.data.date, 'YYYY-MM-DD').format('DD') }}</span
-                                            >
-                                            <Divider />
-                                            <!-- MONTH + YEAR -->
-                                            <span
-                                                :class="[
-                                                    'text-slate-400',
-                                                    'dark:text-slate-100',
-                                                    'font-bold',
-                                                    'text-3xl',
-                                                    'text-center',
-                                                    trx.trx_day_start === +moment(slotProps.data.date).format('D') || trx.trx_day_end === +moment(slotProps.data.date).format('D')
-                                                        ? 'text-slate-200 dark:text-slate-700'
-                                                        : 'text-slate-400 dark:text-slate-500 group-hover:text-slate-500 group-hover:dark:text-slate-300'
-                                                ]"
-                                                >{{ moment(slotProps.data.date, 'YYYY-MM-DD').format('ddd') }}</span
-                                            >
-                                        </div>
-                                    </template>
-                                </Carousel>
+                                        </template>
+                                    </Carousel>
+                                </div>
                                 <div v-if="isDateSpecified" class="flex flex-row gap-7 mt-8">
                                     <!-- LEFT START DATE CARD -->
                                     <div class="flex flex-col gap-3">
                                         <div class="flex flex-col shadow-md rounded-xl p-5 border border-slate-500 hover:border-2 hover:border-slate-500 hover:cursor-pointer hover:bg-slate-500 duration-900 group h-fit">
                                             <div
                                                 @click="
-                                                    trx.trx_day_start = null;
-                                                    trx.trx_date_range_pos = 'from';
+                                                    trx.day_start = null;
+                                                    trx.date_range_pos = 'from';
                                                 "
                                                 :class="[
                                                     'absolute',
@@ -814,21 +875,23 @@ export default {
                                                 ]"
                                             />
                                             <div class="group-hover:text-slate-400 font-bold text-center text-8xl px-2 py-3 text-slate-700 dark:text-slate-100">
-                                                {{ moment(`${trx.trx_year_start}-${trx.trx_month_start}-${trx.trx_day_start}`, 'YYYY-M-D').format('DD') }}
+                                                {{ moment(`${trx.year_start}-${trx.month_start}-${trx.day_start}`, 'YYYY-M-D').isValid() ? moment(`${trx.year_start}-${trx.month_start}-${trx.day_start}`, 'YYYY-M-D').format('DD') : '??' }}
                                             </div>
                                             <Divider />
-                                            <span class="group-hover:text-slate-400 text-slate-500 font-bold text-lg text-center">{{ moment(`${trx.trx_year_start}-${trx.trx_month_start}-${trx.trx_day_start}`, 'YYYY-M-D').format('MMM YYYY') }}</span>
+                                            <span class="group-hover:text-slate-400 text-slate-500 font-bold text-lg text-center">{{
+                                                moment(`${trx.year_start}-${trx.month_start}-${trx.day_start}`, 'YYYY-M-D').isValid() ? moment(`${trx.year_start}-${trx.month_start}-${trx.day_start}`, 'YYYY-M-D').format('MMM YYYY') : '??'
+                                            }}</span>
                                         </div>
-                                        <div v-if="trx.trx_date_range_type !== 'Hari ini'" class="pi pi-arrow-down flex items-center justify-center text-2xl"></div>
+                                        <div v-if="trx.date_range_type !== 'Hari ini'" class="pi pi-arrow-down flex items-center justify-center text-2xl"></div>
                                         <!-- LEFT END DATE CARD -->
                                         <div
-                                            v-if="trx.trx_date_range_type !== 'Hari ini'"
+                                            v-if="trx.date_range_type !== 'Hari ini'"
                                             class="flex flex-col shadow-md rounded-xl p-5 border border-slate-500 hover:border-2 hover:border-slate-500 hover:cursor-pointer hover:bg-slate-500 duration-900 group h-fit"
                                         >
                                             <div
                                                 @click="
-                                                    trx.trx_day_end = null;
-                                                    trx.trx_date_range_pos = 'to';
+                                                    trx.day_end = null;
+                                                    trx.date_range_pos = 'to';
                                                 "
                                                 :class="[
                                                     'absolute',
@@ -851,14 +914,31 @@ export default {
                                                 ]"
                                             />
                                             <div class="group-hover:text-slate-400 font-bold text-center text-8xl px-2 py-3 text-slate-700 dark:text-slate-100">
-                                                {{ moment(`${trx.trx_year_end}-${trx.trx_month_end}-${trx.trx_day_end}`, 'YYYY-M-D').format('DD') }}
+                                                {{ moment(`${trx.year_end}-${trx.month_end}-${trx.day_end}`, 'YYYY-M-D').isValid() ? moment(`${trx.year_end}-${trx.month_end}-${trx.day_end}`, 'YYYY-M-D').format('DD') : '??' }}
                                             </div>
                                             <Divider />
-                                            <span class="group-hover:text-slate-400 text-slate-500 font-bold text-lg text-center">{{ moment(`${trx.trx_year_end}-${trx.trx_month_end}-${trx.trx_day_end}`, 'YYYY-M-D').format('MMM YYYY') }}</span>
+                                            <span class="group-hover:text-slate-400 text-slate-500 font-bold text-lg text-center">{{
+                                                moment(`${trx.year_end}-${trx.month_end}-${trx.day_end}`, 'YYYY-M-D').isValid() ? moment(`${trx.year_end}-${trx.month_end}-${trx.day_end}`, 'YYYY-M-D').format('MMM YYYY') : '??'
+                                            }}</span>
                                         </div>
                                     </div>
                                     <!-- TRANSACTION HISTORY LIST -->
-                                    <div class="flex flex-col gap-3 w-full">
+                                    <div v-if="trx.getting_hist" class="flex flex-col gap-4 w-full">
+                                        <Skeleton height="1.3rem" />
+                                        <Skeleton height="1.3rem" />
+                                        <Skeleton height="1.3rem" />
+                                        <div class="flex flex-row gap-3">
+                                            <Skeleton height="1rem" width="1rem" />
+                                            <Skeleton height="1rem" width="1rem" />
+                                            <Skeleton height="1rem" width="1rem" />
+                                        </div>
+                                        <div class="flex flex-row gap-3">
+                                            <Skeleton height="1rem" width="1rem" />
+                                            <Skeleton height="1rem" width="1rem" />
+                                            <Skeleton height="1rem" width="1rem" />
+                                        </div>
+                                    </div>
+                                    <div v-else class="flex flex-col gap-3 w-full">
                                         <div class="flex flex-row gap-5 justify-between shadow-sm rounded-xl border border-slate-300 dark:border-slate-500 w-full p-3">
                                             <div class="pi pi-arrow-down-right text-green-500 mt-1 ml-2"></div>
                                             <span class="text-slate-500 dark:text-slate-200" v-tooltip.top="'Issuer'">9360091538325669206</span>
@@ -954,15 +1034,15 @@ export default {
                                                 <br />
                                                 <br />
                                                 Adapun Ketentuan yang <span class="font-bold">perlu diperhatikan</span> adalah sebagai berikut : .
-                                                <li>Terminal dibuat per Perangkat yang bersifat Dinamis (Closed Amount)</li>
                                                 <li>Akses username untuk perangkat baru akan dikirimkan pada email yang telah terdaftar</li>
                                                 <li>Akses username yang sudah aktif, <span class="font-bold">hanya dapat</span> digunakan pada perangkat yg terdaftar</li>
+                                                <li>QR dibuat per Perangkat yang bersifat Dinamis (Closed Amount)</li>
                                                 <br />
-                                                Jika telah menyetujui, silahkan klik tombol <span class="font-bold">selanjutnya</span>.
+                                                Jika telah menyetujui, silahkan menekan tombol <span class="font-bold">Tambah User</span>.
                                             </div>
                                         </div>
                                         <div class="flex pt-6 gap-3 justify-end">
-                                            <Button label="Selanjutnya" icon="pi pi-arrow-right" iconPos="right" @click="activateCallback('2')" />
+                                            <Button label="Tambah User" icon="pi pi-arrow-right" iconPos="right" @click="activateCallback('2')" />
                                         </div>
                                     </StepPanel>
                                     <StepPanel v-slot="{ activateCallback }" value="2">
@@ -977,7 +1057,7 @@ export default {
                                             </div>
                                         </div>
                                         <div class="flex pt-6 gap-3 justify-between">
-                                            <Button label="Kembali" severity="secondary" icon="pi pi-arrow-left" @click="activateCallback('1')" />
+                                            <Button label="Ketentuan" severity="secondary" icon="pi pi-arrow-left" @click="activateCallback('1')" />
                                             <Button label="Tutup" icon="pi pi-times" iconPos="right" @click="outlet_show_add_dialog = false" />
                                         </div>
                                     </StepPanel>
