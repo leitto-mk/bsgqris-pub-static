@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    html {
+        @apply text-3xs;
+    }
+
+    @screen 4xl {
+        html {
+            @apply text-sm;
+        }
+    }
+}
