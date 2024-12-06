@@ -36,6 +36,23 @@ export default {
             active_outlet: null,
             outlet_show_terminal_list: false,
             outlet_show_add_dialog: false,
+            action_menu: [
+                {
+                    label: 'Tambah Perangkat',
+                    icon: 'pi pi-plus',
+                    command: () => {
+                        this.outlet_show_add_dialog = true;
+                    }
+                },
+                {
+                    label: 'Daftar User/Perangkat',
+                    icon: 'pi pi-list',
+                    // visible: !this.outlet_show_terminal_list,
+                    command: () => {
+                        this.outlet_show_terminal_list = true;
+                    }
+                }
+            ],
 
             //Transactions
             trx: {
@@ -350,6 +367,9 @@ export default {
                 return count + (terminal.user.status === 2 ? 1 : 0);
             }, 0);
         },
+        toggleActions(event) {
+            this.$refs.menu.toggle(event);
+        },
         confirmReset(user) {
             this.$confirm.require({
                 message: `Apakah anda yakin untuk mengganti perangkat untuk user [${user}] ?`,
@@ -569,6 +589,7 @@ export default {
                             <Tab value="transaksi">Transaksi</Tab>
                         </TabList>
                         <TabPanels>
+                            <!-- OUTLET PANEL -->
                             <TabPanel value="outlet">
                                 <div class="flex flex-row gap-2">
                                     <div :class="['flex flex-col pt-5 gap-5', outlet_show_terminal_list ? 'basis-5/6' : 'w-full']">
@@ -591,35 +612,23 @@ export default {
                                                     <div class="flex flex-wrap gap-2">
                                                         <div
                                                             v-if="getUnregisterdTerminal(outlet)"
-                                                            class="flex items-center justify-center -mt-1 -mb-2 w-10 h-10 border border-orange-500 rounded-full text-sm animate-pulse"
+                                                            class="flex items-center justify-center -mb-2 w-10 h-10 border border-orange-500 rounded-full text-sm animate-pulse"
                                                             v-tooltip.top="'Menunggu Aktivasi'"
                                                         >
                                                             {{ getUnregisterdTerminal(outlet) }}
                                                         </div>
-                                                        <div class="-mt-1 -mb-2" v-tooltip.top="'Tambah Perangkat'">
-                                                            <Button
-                                                                icon="pi pi-plus"
-                                                                severity="success"
-                                                                rounded
-                                                                size="small"
-                                                                outlined
-                                                                @click="
-                                                                    outlet_show_add_dialog = true;
-                                                                    active_outlet = outlet;
-                                                                "
-                                                            />
-                                                        </div>
-                                                        <div
-                                                            v-if="!outlet_show_terminal_list"
-                                                            class="-mt-1 -mb-2"
-                                                            v-tooltip.top="'Daftar User/Perangkat'"
+                                                        <Button
+                                                            type="button"
+                                                            icon="pi pi-ellipsis-v"
+                                                            severity="secondary"
+                                                            size="small"
+                                                            rounded
                                                             @click="
-                                                                outlet_show_terminal_list = true;
                                                                 active_outlet = outlet;
+                                                                toggleActions($event);
                                                             "
-                                                        >
-                                                            <Button icon="pi pi-list" severity="info" rounded size="small" outlined />
-                                                        </div>
+                                                            aria-controls="Pilihan"
+                                                        />
                                                     </div>
                                                 </div>
                                             </div>
@@ -1009,6 +1018,7 @@ export default {
                             </TabPanel>
                         </TabPanels>
                     </Tabs>
+                    <Menu ref="menu" id="overlay_menu" :model="action_menu" :popup="true" />
                     <Dialog v-model:visible="outlet_show_add_dialog" modal header="Penambahan Perangkat" :style="{ width: '50rem' }">
                         <div class="card flex justify-center pt-2">
                             <Stepper value="1" class="basis-[50rem]">
