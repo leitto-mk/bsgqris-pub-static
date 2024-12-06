@@ -107,7 +107,7 @@ export default {
                 case '1 Minggu':
                 case '1 Bulan':
                 case 'Rentang':
-                    return moment(`${this.trx.year_start}-${this.trx.month_start}-${this.trx.day_start_start}`, 'YYYY-M-D').isValid() && moment(`${this.trx.year_start}-${this.trx.month_start}-${this.trx.day_start_start}`, 'YYYY-M-D').isValid();
+                    return moment(`${this.trx.year_start}-${this.trx.month_start}-${this.trx.day_start}`, 'YYYY-M-D').isValid() && moment(`${this.trx.year_end}-${this.trx.month_end}-${this.trx.day_end}`, 'YYYY-M-D').isValid();
                 default:
                     return false;
             }
@@ -142,6 +142,13 @@ export default {
             this.trx.day_end = null;
         },
         'trx.date_range_type'(value) {
+            this.trx.year_start = null;
+            this.trx.month_start = null;
+            this.trx.day_start = null;
+            this.trx.year_end = null;
+            this.trx.month_end = null;
+            this.trx.day_end = null;
+
             switch (value) {
                 case 'Hari ini':
                     this.trx.year_start = +moment().format('YYYY');
@@ -166,20 +173,6 @@ export default {
                     break;
                 case 'Rentang':
                     this.trx.date_range_pos = 'from';
-                    this.trx.year_start = null;
-                    this.trx.month_start = null;
-                    this.trx.day_start = null;
-                    this.trx.year_end = null;
-                    this.trx.month_end = null;
-                    this.trx.day_end = null;
-                    break;
-                default:
-                    this.trx.year_start = null;
-                    this.trx.month_start = null;
-                    this.trx.day_start = null;
-                    this.trx.year_end = null;
-                    this.trx.month_end = null;
-                    this.trx.day_end = null;
                     break;
             }
         },
@@ -1030,10 +1023,37 @@ export default {
                                                 Anda akan melakukan penambahan perangkat pada Outlet <span class="font-bold">{{ active_outlet.outlatName }}</span>
                                                 <br />
                                                 <br />
-                                                Adapun Ketentuan yang <span class="font-bold">perlu diperhatikan</span> adalah sebagai berikut : .
-                                                <li>Akses username untuk perangkat baru akan dikirimkan pada email yang telah terdaftar</li>
-                                                <li>Akses username yang sudah aktif, <span class="font-bold">hanya dapat</span> digunakan pada perangkat yg terdaftar</li>
-                                                <li>QR dibuat per Perangkat yang bersifat Dinamis (Closed Amount)</li>
+                                                Adapun Ketentuan yang <span class="font-bold">perlu diperhatikan</span> adalah sebagai berikut :
+                                                <br />
+                                                <br />
+                                                <div class="flex flex-row gap-3">
+                                                    <div class="font-bold">1.</div>
+                                                    <div>Username untuk perangkat baru akan dikirimkan pada email yang telah terdaftar</div>
+                                                </div>
+                                                <div class="flex flex-row gap-3">
+                                                    <div class="font-bold">2.</div>
+                                                    <div>Akses username yang sudah diaktifkan pada perangkat hanya bisa digunakan pada perangkat tersebut</div>
+                                                </div>
+                                                <div class="flex flex-row gap-3">
+                                                    <div class="font-bold">3.</div>
+                                                    <div>QRIS yang dibuat pada perangkat merupakan QRIS dinamis</div>
+                                                </div>
+                                                <div class="flex flex-row gap-3">
+                                                    <div class="font-bold">4.</div>
+                                                    <div>Apabila user yang sudah terdaftar ingin melakukan perubahan, maka akan dilakukan oleh user Admin Merchant</div>
+                                                </div>
+                                                <div class="flex flex-row gap-3">
+                                                    <div class="font-bold">5.</div>
+                                                    <div>Ketentuan pengamanan username dan password adalah kewajiban pemegang user</div>
+                                                </div>
+                                                <div class="flex flex-row gap-3">
+                                                    <div class="font-bold">6.</div>
+                                                    <div>Sehubungan dengan pengelolaan user, meechant bertanggung jawab sepenuhnya atas segala transaksi qris yang terjadi melalui perangkat</div>
+                                                </div>
+                                                <div class="flex flex-row gap-3">
+                                                    <div class="font-bold">7.</div>
+                                                    <div>Atas pengelolaan ini, membebaskan bank dari risiko penyalahgunaan user dan password</div>
+                                                </div>
                                                 <br />
                                                 Jika telah menyetujui, silahkan menekan tombol <span class="font-bold">Tambah User</span>.
                                             </div>
