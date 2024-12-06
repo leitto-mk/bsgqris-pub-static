@@ -1,5 +1,6 @@
 0.0.7
     - Update deployment script
+    - Update deployment script
     - Add Term & Condition in Add Device
     - Update Tailwind Config
 0.0.6
