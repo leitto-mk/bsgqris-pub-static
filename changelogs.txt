@@ -1,0 +1,25 @@
+0.0.7
+    - Update deployment script
+    - Add Term & Condition in Add Device
+    - Update Tailwind Config
+0.0.6
+    - Fix Date Checking
+    - WIP
+0.0.5
+    - Update Outlet Functionality
+    - Minor Adjustments
+0.0.4
+    - Remove redundant components
+    - Fix Dark Mode toggle
+    - Add Deploy.sh for Dev
+    - WIP
+    - Update Background
+0.0.3
+    - Update Dashboard
+    - Adjustment
+    - Remove Unnecessary Components
+0.0.2
+    - Update Dashboard
+    - Update
+0.0.1
+    - Initial commit
