@@ -1,7 +1,5 @@
 #!/usr/bin/sh
 
-#!/usr/bin/sh
-
 #Get current version
 current_tag=$(head -n 1 "changelogs.txt")
 
@@ -12,6 +10,11 @@ last_digit=${current_tag##*.}
 # Increment the last digit
 new_last_digit=$((last_digit + 1))
 new_version="${prefix}.${new_last_digit}"
+
+# Remove new version's tag if exist
+git push origin --delete $new_version
+git push public --delete $new_version
+git tag -d $new_version
 
 # Get all commits in reverse order (oldest to newest) with tags
 commits_with_tags=$(git log --reverse --pretty=format:"%H %s" --tags --decorate=short)
@@ -76,6 +79,7 @@ done
 { cat "$output_file"; cat "$temp_file"; } > new_file.txt && mv new_file.txt "$output_file"
 
 rm -f "$temp_file"
+
 
 # Update changelogs
 git add .
