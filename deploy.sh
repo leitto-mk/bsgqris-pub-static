@@ -2,6 +2,7 @@
 
 #Get current version
 current_tag=$(head -n 1 "changelogs.txt")
+current_tag=${current_tag:-"0.0.1"}
 
 # Extract the prefix (everything except the last digit) and the last digit
 prefix=${current_tag%.*}
@@ -53,6 +54,11 @@ for commit in $(git rev-list HEAD); do
 
         if [[ "$current_tag_iteration" == "$current_tag" ]]; then
             break
+        fi
+
+        #Skip Auto changelogs commit
+        if [[ "$commit_message" == "    - auto-changelogs" || "$commit_message" == "    - Update changelogs" ]]; then
+            continue
         fi
 
         echo "$current_tag_iteration" >> "$output_file"
