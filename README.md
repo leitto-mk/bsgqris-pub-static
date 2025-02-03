@@ -9,6 +9,7 @@
 - Jalankan perintah berikut untuk menginstall package pada **package.json**:  
 
         npm install
+
 - Jalankan perintah berikut untuk menjalankan aplikasi secara local:
 
         npm run dev
@@ -45,26 +46,17 @@
 
     Hasil versioning menghasilkan *output* berikut:
 
-        2.1.24
-            - Add Terminal's Username on Reset Device
-            - Seperate Bar Chart by Merchant & Outlet each Branches
-            - Adjust metaURL null coalescing
-            - Unify Docker image
-            - Merge remote-tracking branch 'origin/master'
-            - Implemented NGINX's SSI for Dynamic URL for compose
-            - Implemente NGINX's SSI for Dynamic URL for compose
-        2.1.23
-            - auto-changelogs
-            - Add Save State for Registration
-            - Add Period Selection for ON/OFF-US Report
-        2.1.22
-            - auto-changelogs
-            - Add MDR Report
-            - Replace UNI to PSO
-            - Update Downloaded Report Name
-            - Fix Year Selection on Reporting
-            - Add ON-US, ACQ-OFF-US & ISS-OFF-US Reports
-            - Update Report Load State
+        0.0.7
+            - Update deployment script
+            - Update deployment script
+            - Add Term & Condition in Add Device
+            - Update Tailwind Config
+        0.0.6
+            - Fix Date Checking
+            - WIP
+        0.0.5
+            - Update Outlet Functionality
+            - Minor Adjustments
 
         ...
 
@@ -79,3 +71,12 @@
 
     ### 4.3 Deployment
     Deployment akan melakukan push pada repository tujuan **containker.banksulutgo.co.id:5000**
+
+## 5. DEMO
+Jalankan Demo dengan mengganti branch dari `main` ke `demo`:
+
+    git checkout demo
+
+Demo menjalankan aplikasi tanpa akses Back-End. untuk akses login dapat menggunakan username dan password berikut:
+- user: **`demo`**
+- pass: **`demo`**
